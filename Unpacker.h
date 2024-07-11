@@ -2,6 +2,7 @@
 
 #include "Visitable.h"
 #include "List.h"
+#include "PackedType.h"
 
 template<typename T, typename L> struct Unpacker { };
 
@@ -9,9 +10,9 @@ template<typename T, typename... Us>
 struct Unpacker<T, List<Us...>>
 {
     T& a;
-    List<Us...>& total;
+    const List<Us...>& total;
 
-    Unpacker(T& a_in, List<Us...>& total_in) : a(a_in), total(total_in) { }
+    Unpacker(T& a_in, const List<Us...>& total_in) : a(a_in), total(total_in) { }
 
     template<typename X>
     auto expand(X& x)
@@ -34,7 +35,7 @@ struct Unpacker<T, List<Us...>>
 
           // std::cout << "unpacking " << total.head << std::endl;
           a.*e = total.head;
-          return Unpacker<T, typename List<Us...>::Tail>(a, static_cast<typename List<Us...>::Tail&>(total));
+          return Unpacker<T, typename List<Us...>::Tail>(a, static_cast<const typename List<Us...>::Tail&>(total));
         }
     }
 
@@ -43,9 +44,9 @@ struct Unpacker<T, List<Us...>>
 
 template<typename T> struct Unpacker<T, List<>>
 {
-    List<>& total;
+    const List<>& total;
 
-    Unpacker(T& a_in, List<>& total_in) : total(total_in) { }
+    Unpacker(T& a_in, const List<>& total_in) : total(total_in) { }
 
     template<typename X>
     auto expand(X& x)
@@ -54,3 +55,9 @@ template<typename T> struct Unpacker<T, List<>>
     }
 };
 
+template <typename T> T Unpack(const PackedType<T> &list) {
+  T x;
+  Unpacker<T, PackedType<T>> unpacker(x, list);
+  T::visit(unpacker);
+  return x;
+}

@@ -6,7 +6,6 @@ template<typename T, typename... Ts> struct List<T, Ts...> : public List<Ts...>
 {
     T head;
 
-
     using Head = T;
     using Tail = List<Ts...>;
     
@@ -19,4 +18,3 @@ template<typename T, typename... Ts> struct List<T, Ts...> : public List<Ts...>
 template<> struct List<>
 {
 };
-
